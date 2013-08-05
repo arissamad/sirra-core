@@ -25,6 +25,18 @@ function log() {
 	}
 };
 
+function err() {
+    if(isIE) {
+        for(var i=0; i<arguments.length; i++) {
+            console.log(arguments[i]);
+        }
+    } else {
+        console.log.apply(console, arguments);
+    }
+}
+
+log.error = err;
+
 log("Starting sirra-bootstrap.js");
 
 var loadCss = function(cssFile) {
