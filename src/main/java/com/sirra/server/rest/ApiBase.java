@@ -12,12 +12,21 @@ import com.sirra.server.session.*;
  * Simply annotate the appropriate methods with GET, POST, PUT or DELETE annotations.
  * Return any object that is supported by our JSON converter.
  * 
+ * - You have access to the GET parameters via hasParameter() and getParameter().
+ * - You have acccess to the PATH variables via the "pathParameters" variable.
+ * - Also see ApiServlet for information on mapping parameters to API method parameters.
+ * 
  * @author aris
  */
 public class ApiBase extends HttpServlet
 {
 	protected String method; // GET or POST
-	protected List<String> pathVariables; // e.g. a path of "/teachers/1234" will result in this being set to ["1234"].
+	
+	// The GET parameters
+	protected Map<String, String> parameters;
+	
+	// A path of "/teachers/1234" will result in this being set to ["1234"].
+	protected List<String> pathParameters; 
 	
 	protected ApiBase() {
 		// Do nothing special during instantiation
@@ -41,5 +50,22 @@ public class ApiBase extends HttpServlet
 	protected void save(Object object) {
 		SirraSession ms = SirraSession.get();
 		ms.getHibernateSession().save(object);
+	}
+
+	// Convenience method to retrieve a GET parameter as a string
+	protected String getParameter(String parameterName) {
+		return parameters.get(parameterName);
+	}
+	
+	protected void setParameterMap(Map<String, String> parameterMap) {
+		this.parameters = parameterMap;
+	}
+	
+	protected boolean hasParameter(String parameterName) {
+		return parameters.containsKey(parameterName);
+	}
+	
+	protected void setPathParameters(List<String> pathParameters) {
+		this.pathParameters = pathParameters;
 	}
 }

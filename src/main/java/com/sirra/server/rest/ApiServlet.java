@@ -19,7 +19,15 @@ import com.sirra.server.session.*;
  * All API calls are directed to this servlet first, which then finds the right ApiBase handler
  * based on a matching path.
  * 
- * Calls the appropriate method in based on annotations (GET, POST, PUT or DELETE). 
+ * Calls the appropriate method in based on annotations (GET, POST, PUT or DELETE).
+ * 
+ * There are three ways to pass in parameters:
+ * 
+ *   - Regular GET parameters. These are available from ApiBase via convenience methods.
+ *   - PATH parameters. These are available from ApiBase via "pathParameters" variable.
+ *   - A special GET parameter called "parameters". This is an array and maps to the API method parameters.
+ *     For example, if the api method is "doApi(String a, int b)", then the rest call can pass in 
+ *     ?parameters=["A String", 5].
  * 
  * @author aris
  */
@@ -68,59 +76,68 @@ public class ApiServlet extends HttpServlet {
     {
     	String apiPath = request.getPathInfo();
     	HttpType httpMethod = HttpType.valueOf(request.getMethod());
-
+    	
     	String parameterString = request.getParameter("parameters");
-    	
-    	System.out.println("\n--------- API Call Begin: " + httpMethod.name() + " " + apiPath + " " + parameterString + " --------- ");
-    	SirraSession.start(request, response);
-    	
     	List<Object> parameters = (List<Object>) JsonUtil.getInstance().parse(parameterString);
     	
-    	try {
-	    	
-	    	List<String> pathList = new ArrayList();
-	    	String[] pathElements = apiPath.split("/");
-	    	for(String pathElement: pathElements) {
-	    		if(pathElement.equals("")) continue;
-	    		pathList.add(pathElement.toLowerCase());
-	    	}
-	    	
-	    	Class clazz = processPath(pathList);
-	    	
-	    	try {
-	    		ApiBase apiBase = (ApiBase) clazz.newInstance();
-	    		
-	    		Object result = null;
-	    		if(httpMethod == HttpType.GET) {
-	    			result = AnnotatedMethodCaller.call(apiBase, GET.class, parameters);
-	    			
-	    		} else if(httpMethod == HttpType.POST) {
-	    			result = AnnotatedMethodCaller.call(apiBase, POST.class, parameters);
-	    		} else if(httpMethod == HttpType.PUT) {
-	    			result = AnnotatedMethodCaller.call(apiBase, PUT.class, parameters);
-	    		} else if(httpMethod == HttpType.DELETE) {
-	    			result = AnnotatedMethodCaller.call(apiBase, DELETE.class, parameters);
-	    		} else {
-	    			result = AnnotatedMethodCaller.call(apiBase, GET.class, parameters);
-	    		}
-	
-	    		String responseStr = formatResponse(result);
-	    		
-	    		response.getWriter().write(responseStr);
-	    		return;
-	    	} catch(Exception e) {
-	    		throw new RuntimeException(e);
-	    	}
-	    	
-	    	//response.getWriter().write("[api not found] The date is: " + new Date().toString());
+    	Map<String, String> parameterMap = processParameters(request);
+
+    	List<String> pathList = new ArrayList();
+    	String[] pathElements = apiPath.split("/");
+    	for(String pathElement: pathElements) {
+    		if(pathElement.equals("")) continue;
+    		pathList.add(pathElement.toLowerCase());
     	}
-    	finally {
+    	
+    	List<String> pathParameters = new ArrayList();
+    	Class clazz = processPath(pathList, pathParameters);
+    	
+    	StringBuffer parameterDebug = new StringBuffer();
+    	Iterator<String> parameterIterator = parameterMap.keySet().iterator();
+    	while(parameterIterator.hasNext()) {
+    		String key = parameterIterator.next();
+    		parameterDebug.append(key + ": ");
+    		parameterDebug.append(parameterMap.get(key));
+    		
+    		if(parameterIterator.hasNext()) parameterDebug.append(", ");
+    	}
+    	
+    	System.out.println("\n--------- API Call Begin: " + httpMethod.name() + " " + apiPath + " - Parameters: [" + parameterDebug.toString() + "] --------- ");
+    	SirraSession.start(request, response);
+    	
+    	try {
+    		ApiBase apiBase = (ApiBase) clazz.newInstance();
+    		
+    		apiBase.setPathParameters(pathParameters);
+    		apiBase.setParameterMap(parameterMap);
+    		
+    		Object result = null;
+    		if(httpMethod == HttpType.GET) {
+    			result = AnnotatedMethodCaller.call(apiBase, GET.class, parameters);
+    			
+    		} else if(httpMethod == HttpType.POST) {
+    			result = AnnotatedMethodCaller.call(apiBase, POST.class, parameters);
+    		} else if(httpMethod == HttpType.PUT) {
+    			result = AnnotatedMethodCaller.call(apiBase, PUT.class, parameters);
+    		} else if(httpMethod == HttpType.DELETE) {
+    			result = AnnotatedMethodCaller.call(apiBase, DELETE.class, parameters);
+    		} else {
+    			result = AnnotatedMethodCaller.call(apiBase, GET.class, parameters);
+    		}
+
+    		String responseStr = formatResponse(result);
+    		
+    		response.getWriter().write(responseStr);
+    		return;
+    	} catch(Exception e) {
+    		throw new RuntimeException(e);
+    	} finally {
     		SirraSession.end();
     		System.out.println("--------- API Call END: " + httpMethod.name() + " " + apiPath +" ---------");
     	}
     }
     
-    protected Class processPath(List<String> pathList) {
+    protected Class processPath(List<String> pathList, List<String> pathParameters) {
     	// Try longest first, and get progressively shorter
     	
     	for(int i=pathList.size(); i>=0; i--) {
@@ -136,6 +153,11 @@ public class ApiServlet extends HttpServlet {
     		
     		Class clazz = getCorrespondingClass(str.toString());
     		if(clazz != null) {
+    			
+    			for(int k=i; k<pathList.size(); k++) {
+    				pathParameters.add(pathList.get(k));
+    			}
+    			
     			return clazz;
     		}
     	}
@@ -188,6 +210,24 @@ public class ApiServlet extends HttpServlet {
 
     	return lookup.get(restPath);
     }
+    
+    protected Map<String, String> processParameters(HttpServletRequest request) {
+
+    	Map<String, String[]> requestMap = request.getParameterMap();
+    	Map<String, String> parameterMap = new TreeMap();
+    	
+    	System.out.println("Parameters:");
+    	for(String key: requestMap.keySet()) {
+    		String[] values = requestMap.get(key);
+    		String value = null;
+    		if(values.length > 0) value = values[0];
+    		
+    		parameterMap.put(key, value);
+    	}
+    	
+    	return parameterMap;
+    }
+    
     protected String formatResponse(Object returnValue) {
     	Object json;
     	
