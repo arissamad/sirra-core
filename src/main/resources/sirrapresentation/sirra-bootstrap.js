@@ -28,10 +28,10 @@ function log() {
 function err() {
     if(isIE) {
         for(var i=0; i<arguments.length; i++) {
-            console.log(arguments[i]);
+            console.error(arguments[i]);
         }
     } else {
-        console.log.apply(console, arguments);
+        console.error.apply(console, arguments);
     }
 }
 
