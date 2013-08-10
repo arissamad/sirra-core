@@ -30,7 +30,8 @@ public class StaticContentServlet extends HttpServlet {
 		request.setCharacterEncoding("UTF-8");
 		response.setCharacterEncoding("UTF-8");
 		
-		String mappedPath = mapPath(request.getPathInfo().toLowerCase());
+		//String mappedPath = mapPath(request.getPathInfo().toLowerCase());
+		String mappedPath = mapPath(request.getPathInfo());
 		
 		System.out.println("\nRetrieving static file: " + mappedPath);
 		
@@ -42,11 +43,11 @@ public class StaticContentServlet extends HttpServlet {
         
         if (is == null) {
         	System.out.println(" -- Path not recognized");
-        	request.getRequestDispatcher("error404.html").forward(request,response);
+        	request.getRequestDispatcher("/error404.html").forward(request,response);
         	return;
         }
         
-        if(mimeType.equals("text/html")) {
+        if(mimeType != null && mimeType.equals("text/html")) {
         	// Do special processing for html files to support templating.
 
             String content = IOUtils.toString(is);
