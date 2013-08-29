@@ -1,19 +1,30 @@
 package com.sirra.server.rest;
 
-import java.io.*;
-import java.lang.reflect.*;
-import java.util.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeMap;
 
-import javax.servlet.*;
-import javax.servlet.annotation.*;
-import javax.servlet.http.*;
-import javax.ws.rs.*;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 
-import org.json.*;
-import org.reflections.*;
+import org.json.JSONObject;
+import org.reflections.Reflections;
 
-import com.sirra.server.json.*;
-import com.sirra.server.session.*;
+import com.sirra.server.json.JsonUtil;
+import com.sirra.server.session.SirraSession;
 
 /**
  * All API calls are directed to this servlet first, which then finds the right ApiBase handler
@@ -76,6 +87,11 @@ public class ApiServlet extends HttpServlet {
     {
     	String apiPath = request.getPathInfo();
     	HttpType httpMethod = HttpType.valueOf(request.getMethod());
+    	
+    	Map<String, String[]> mm =  request.getParameterMap();
+    	for (Entry<String, String[]> e : mm.entrySet()) {
+    	    System.out.println(" --- " + e.getKey());
+    	}
     	
     	String parameterString = request.getParameter("parameters");
     	List<Object> parameters = (List<Object>) JsonUtil.getInstance().parse(parameterString);

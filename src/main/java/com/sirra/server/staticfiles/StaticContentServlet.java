@@ -55,6 +55,7 @@ public class StaticContentServlet extends HttpServlet {
             
             response.getWriter().write(content);
         } else {
+            System.out.println("\n ==== =not text Retrieving static file: " + mappedPath);
         	// Otherwise, just write the file contents out.
         	response.getOutputStream().write(IOUtils.toByteArray(is));
         	return;
