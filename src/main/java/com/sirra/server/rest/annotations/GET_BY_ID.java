@@ -1,5 +1,7 @@
 package com.sirra.server.rest.annotations;
 
+import java.lang.annotation.*;
+
 /**
  * Instead of annotating with @GET, you can annotate with @GET_BY_ID for the specific case of retrieving a single record by ID.
  * 
@@ -10,6 +12,7 @@ package com.sirra.server.rest.annotations;
  *  
  * @author aris
  */
+@Retention(RetentionPolicy.RUNTIME)
 public @interface GET_BY_ID {
 
 }

@@ -25,7 +25,7 @@ public class AnnotatedMethodCaller {
 		Set<Method> methods = ReflectionUtils.getAllMethods(apiBase.getClass(), ReflectionUtils.withAnnotation(annotationClass));
 		
 		if(methods.size() != 1) {
-			throw new RuntimeException("Number of GET methods should be 1 but it is: " + methods.size());
+			throw new RuntimeException("Number of methods matching " + annotationClass.getSimpleName() + " should be 1 but it is: " + methods.size());
 		}
 		
 		Method method = methods.iterator().next();
