@@ -24,6 +24,7 @@ import org.json.JSONObject;
 import org.reflections.Reflections;
 
 import com.sirra.server.json.JsonUtil;
+import com.sirra.server.rest.annotations.*;
 import com.sirra.server.session.SirraSession;
 
 /**
@@ -129,7 +130,14 @@ public class ApiServlet extends HttpServlet {
     		
     		Object result = null;
     		if(httpMethod == HttpType.GET) {
-    			result = AnnotatedMethodCaller.call(apiBase, GET.class, parameters);
+    			
+    			if(pathParameters.size() == 1) {
+    				// Specific case of passing ID as path parameter
+    				result = AnnotatedMethodCaller.call(apiBase, GET_BY_ID.class, parameters);
+    			} else {
+    				// General case
+    				result = AnnotatedMethodCaller.call(apiBase, GET.class, parameters);
+    			}
     			
     		} else if(httpMethod == HttpType.POST) {
     			result = AnnotatedMethodCaller.call(apiBase, POST.class, parameters);

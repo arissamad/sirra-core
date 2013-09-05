@@ -51,6 +51,11 @@ public class ApiBase extends HttpServlet
 		SirraSession ms = SirraSession.get();
 		ms.getHibernateSession().save(object);
 	}
+	
+	protected Object load(Class clazz, String id) {
+		SirraSession ms = SirraSession.get();
+		return ms.getHibernateSession().load(clazz, id);
+	}
 
 	// Convenience method to retrieve a GET parameter as a string
 	protected String getParameter(String parameterName) {
@@ -67,5 +72,9 @@ public class ApiBase extends HttpServlet
 	
 	protected void setPathParameters(List<String> pathParameters) {
 		this.pathParameters = pathParameters;
+	}
+	
+	public List<String> getPathParameters() {
+		return pathParameters;
 	}
 }

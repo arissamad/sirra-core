@@ -30,13 +30,23 @@ public class AnnotatedMethodCaller {
 		
 		Method method = methods.iterator().next();
 		
-		// Method 1 of specifying method parameters.
-		Object[] parameterArray = new Object[0];
-		if(parameters != null) {
-			parameterArray = parameters.toArray();
+		List<Object> finalParameterList = new ArrayList();
+		
+		// Fill in ID parameter for GET_BY_ID. Other methods of specifying parameters, if applicable, will override this.
+		if(annotationClass == GET_BY_ID.class) {
+			if(apiBase.getPathParameters().size() == 1) {
+				finalParameterList.add(apiBase.getPathParameters().get(0));
+			}
 		}
 		
-		// Method 2 of specifying method parameters.
+		
+		// Method 1 of specifying method parameters.
+		if(parameters != null) {
+			finalParameterList.clear();
+			finalParameterList.addAll(parameters);
+		}
+		
+		// Method 2 of specifying method parameters: As query parameters (or, in the case of jQuery, as the data object).
 		Parameters variableAnnotation = method.getAnnotation(Parameters.class);
 		Class[] parameterTypes = method.getParameterTypes();
 		if(variableAnnotation != null) {
@@ -50,6 +60,13 @@ public class AnnotatedMethodCaller {
 				
 				// If value was not passed in via REST call, it will be null.
 				String value = apiBase.getParameter(parameterName);
+				
+				// Special case for first parameter when it is GET_BY_ID
+				if(i == 0 && annotationClass == GET_BY_ID.class) {
+					if(apiBase.getPathParameters().size() == 1) {
+						value = apiBase.getPathParameters().get(0);
+					}
+				}
 				
 				// Now cast value appropriately
 				Class parameterType = parameterTypes[i];
@@ -65,17 +82,18 @@ public class AnnotatedMethodCaller {
 					} else {
 						values.add(new Double(value));
 					}
-					
 				}
 				else {
 					values.add(value);	
 				}
 			}
-			parameterArray = values.toArray();
+			
+			finalParameterList.clear();
+			finalParameterList.addAll(values);
 		}
 		
 		try {
-			return method.invoke(apiBase, parameterArray);
+			return method.invoke(apiBase, finalParameterList.toArray());
 		} catch(Exception e) {
 			throw new RuntimeException(e);
 		}
