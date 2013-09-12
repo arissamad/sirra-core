@@ -3,7 +3,9 @@ package com.sirra.server.rest.annotations;
 import java.lang.annotation.*;
 
 /**
- * Instead of annotating with @GET, you can annotate with @GET_BY_ID for the specific case of retrieving a single record by ID.
+ * This enhances the @GET, @PUT and @DELETE annotations.
+ * 
+ * This annotation @BY_ID means the method expects a single pathParameter, which is the ID of the record.
  * 
  * More specifically:
  * 
@@ -13,6 +15,6 @@ import java.lang.annotation.*;
  * @author aris
  */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface GET_BY_ID {
+public @interface BY_ID {
 
 }

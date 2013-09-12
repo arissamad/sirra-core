@@ -3,6 +3,8 @@ package com.sirra.server.rest;
 import java.lang.reflect.*;
 import java.util.*;
 
+import javax.ws.rs.*;
+
 import org.reflections.*;
 
 import com.sirra.server.rest.annotations.*;
@@ -20,12 +22,30 @@ import com.sirra.server.rest.annotations.*;
  */
 public class AnnotatedMethodCaller {
 	
-	public static Object call(ApiBase apiBase, Class annotationClass, List<Object> parameters) {
+	public static Object call(ApiBase apiBase, List<Object> parameters, Class annotationClass) {
+		
+		boolean firstParameterIsId = false;
+		
+		if(apiBase.getPathParameters().size() == 1) {
+			firstParameterIsId = true;
+		}
 		
 		Set<Method> methods = ReflectionUtils.getAllMethods(apiBase.getClass(), ReflectionUtils.withAnnotation(annotationClass));
 		
+		// Now filter BY_ID methods as necessary
+		Iterator<Method> methodIt = methods.iterator();
+		while(methodIt.hasNext()) {
+			Method method = methodIt.next();
+			
+			if(firstParameterIsId && !method.isAnnotationPresent(BY_ID.class)) {
+				methodIt.remove();
+			} else if(!firstParameterIsId && method.isAnnotationPresent(BY_ID.class)) {
+				methodIt.remove();
+			}
+		}
+		
 		if(methods.size() != 1) {
-			throw new RuntimeException("Number of methods matching " + annotationClass.getSimpleName() + " should be 1 but it is: " + methods.size());
+			throw new RuntimeException("For class " + apiBase.getClass().getSimpleName() + ", number of methods matching " + annotationClass + " and has BY_ID:" + firstParameterIsId + " should be 1 but it is: " + methods.size());
 		}
 		
 		Method method = methods.iterator().next();
@@ -33,12 +53,12 @@ public class AnnotatedMethodCaller {
 		List<Object> finalParameterList = new ArrayList();
 		
 		// Fill in ID parameter for GET_BY_ID. Other methods of specifying parameters, if applicable, will override this.
-		if(annotationClass == GET_BY_ID.class) {
+		
+		if(firstParameterIsId) {
 			if(apiBase.getPathParameters().size() == 1) {
 				finalParameterList.add(apiBase.getPathParameters().get(0));
 			}
 		}
-		
 		
 		// Method 1 of specifying method parameters.
 		if(parameters != null) {
@@ -62,7 +82,7 @@ public class AnnotatedMethodCaller {
 				String value = apiBase.getParameter(parameterName);
 				
 				// Special case for first parameter when it is GET_BY_ID
-				if(i == 0 && annotationClass == GET_BY_ID.class) {
+				if(i == 0 && firstParameterIsId) {
 					if(apiBase.getPathParameters().size() == 1) {
 						value = apiBase.getPathParameters().get(0);
 					}
@@ -76,7 +96,14 @@ public class AnnotatedMethodCaller {
 					} else {
 						values.add(new Integer(value));
 					}
-				} else if(parameterType.equals(double.class)) {
+				} else if(parameterType.equals(Integer.class)) {
+					if(value == null) {
+						values.add(null);
+					} else {
+						values.add(new Integer(value));
+					}
+				}
+				else if(parameterType.equals(double.class)) {
 					if(value == null) {
 						values.add(0.0d);
 					} else {
@@ -97,5 +124,25 @@ public class AnnotatedMethodCaller {
 		} catch(Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+	
+	protected static String formatAnnotations(List<Class> annotations) {
+		StringBuffer str = new StringBuffer();
+		str.append("[");
+		
+		Iterator<Class> it = annotations.iterator();
+		
+		while(it.hasNext()) {
+			Class annotation = it.next();
+			
+			str.append(annotation.getSimpleName());
+			while(it.hasNext()) {
+				str.append(", ");
+			}
+		}
+		
+		str.append("]");
+		
+		return str.toString();
 	}
 }

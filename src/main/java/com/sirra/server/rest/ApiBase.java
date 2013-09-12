@@ -52,9 +52,9 @@ public class ApiBase extends HttpServlet
 		ms.getHibernateSession().save(object);
 	}
 	
-	protected Object get(Class clazz, String id) {
+	protected <T extends Object> T get(Class<T> clazz, String id) {
 		SirraSession ms = SirraSession.get();
-		return ms.getHibernateSession().get(clazz, id);
+		return (T) ms.getHibernateSession().get(clazz, id);
 	}
 
 	// Convenience method to retrieve a GET parameter as a string

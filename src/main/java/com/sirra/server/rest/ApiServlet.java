@@ -130,23 +130,15 @@ public class ApiServlet extends HttpServlet {
     		
     		Object result = null;
     		if(httpMethod == HttpType.GET) {
-    			
-    			if(pathParameters.size() == 1) {
-    				// Specific case of passing ID as path parameter
-    				result = AnnotatedMethodCaller.call(apiBase, GET_BY_ID.class, parameters);
-    			} else {
-    				// General case
-    				result = AnnotatedMethodCaller.call(apiBase, GET.class, parameters);
-    			}
-    			
+    			result = AnnotatedMethodCaller.call(apiBase, parameters, GET.class);
     		} else if(httpMethod == HttpType.POST) {
-    			result = AnnotatedMethodCaller.call(apiBase, POST.class, parameters);
+    			result = AnnotatedMethodCaller.call(apiBase, parameters, POST.class);
     		} else if(httpMethod == HttpType.PUT) {
-    			result = AnnotatedMethodCaller.call(apiBase, PUT.class, parameters);
+    			result = AnnotatedMethodCaller.call(apiBase, parameters, PUT.class);
     		} else if(httpMethod == HttpType.DELETE) {
-    			result = AnnotatedMethodCaller.call(apiBase, DELETE.class, parameters);
+    			result = AnnotatedMethodCaller.call(apiBase, parameters, DELETE.class);
     		} else {
-    			result = AnnotatedMethodCaller.call(apiBase, GET.class, parameters);
+    			result = AnnotatedMethodCaller.call(apiBase, parameters, GET.class);
     		}
 
     		String responseStr = formatResponse(result);
