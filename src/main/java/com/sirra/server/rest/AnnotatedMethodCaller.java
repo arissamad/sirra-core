@@ -5,8 +5,11 @@ import java.util.*;
 
 import javax.ws.rs.*;
 
+import org.eclipse.jetty.util.ajax.*;
+import org.json.*;
 import org.reflections.*;
 
+import com.sirra.server.json.*;
 import com.sirra.server.rest.annotations.*;
 
 /**
@@ -89,7 +92,14 @@ public class AnnotatedMethodCaller {
 				}
 				
 				// Now cast value appropriately
+				
+				if(i >= parameterTypes.length) {
+					throw new RuntimeException("Misconfigured REST method: Expecting parameter \"" + parameterName + "\", but method signature does not have that.");
+				}
+				
 				Class parameterType = parameterTypes[i];
+				
+				// Consider using Caster.cast()
 				if(parameterType.equals(int.class)) {
 					if(value == null) {
 						values.add(0);
@@ -110,8 +120,16 @@ public class AnnotatedMethodCaller {
 						values.add(new Double(value));
 					}
 				}
+				else if(parameterType.equals(String.class)) {
+					values.add(value);
+				}
+				else if(parameterType.equals(Boolean.class)) {
+					values.add(Boolean.parseBoolean(value));
+				}
 				else {
-					values.add(value);	
+					// Assume complex JSON
+					Object obj = JsonUtil.getInstance().parse(value);
+					values.add(obj);	
 				}
 			}
 			

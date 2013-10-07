@@ -88,7 +88,10 @@ public class ControlCompiler {
 			String content = IOUtils.toString(is);
 			fileList.add(content);
 		} catch(IOException e) {
-			throw new RuntimeException();
+			throw new RuntimeException(e);
+		} catch(Exception e) {
+			System.err.println("Problem with file " + file);
+			throw new RuntimeException(e);
 		}
 	}
 	

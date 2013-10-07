@@ -39,4 +39,56 @@ ClassUtilStatic.prototype.mixin = function(CurrentClass, currentInstance, SuperC
 	}
 };
 
+ClassUtilStatic.prototype.serializable = function(currentClass, typeName, attributeArray) {
+	
+	for(var i=0; i<attributeArray.length; i++) {
+		var argName = attributeArray[i];
+		
+		var capitalArgName = argName.substring(0, 1).toUpperCase() + argName.substring(1);
+		
+		if(currentClass.prototype["get" + capitalArgName] == null) {
+			currentClass.prototype["get" + capitalArgName] = function(argName) {
+				return function() {
+					return this[argName];
+				};
+			}(argName);
+		}
+		
+		if(currentClass.prototype["set" + capitalArgName] == null) {
+			currentClass.prototype["set" + capitalArgName] = function(argName) {
+				return function(value) {
+					this[argName] = value;
+				};
+			}(argName);
+		}
+	}
+	
+	currentClass.prototype._s_attributes = attributeArray;
+	currentClass.prototype._s_attributes.push("_s_type");
+	currentClass.prototype._s_type = typeName;
+	
+	currentClass.prototype._s_replacer = function(key, value) {
+		value;
+	}
+	
+	currentClass.prototype._toJSON = function() {
+		currentClass.prototype.toJSON = null;
+		var str = JSON.stringify(this, currentClass.prototype._s_attributes);
+		currentClass.prototype.toJSON = currentClass.prototype._toJSON;
+		
+		var obj = JSON.parse(str);
+		return obj;
+	}
+	
+	currentClass.prototype.toJSON = currentClass.prototype._toJSON;
+}
+
+function _s_toJSON() {
+	PersonCard.prototype.toJSON = null;
+	var str = JSON.stringify(this, ["email"]);
+	PersonCard.prototype.toJSON = PersonCard.prototype._toJSON;
+	
+	return str;
+}
+
 var ClassUtil = new ClassUtilStatic();

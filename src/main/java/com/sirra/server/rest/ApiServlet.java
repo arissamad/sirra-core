@@ -58,6 +58,10 @@ public class ApiServlet extends HttpServlet {
 	public static void setAPIPackageBase(String incomingPackageBase) {
 		packageBase = incomingPackageBase;
 	}
+	
+	public static String getAPIPackageBase() {
+		return packageBase;
+	}
 
 	@Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
@@ -93,6 +97,8 @@ public class ApiServlet extends HttpServlet {
     	for (Entry<String, String[]> e : mm.entrySet()) {
     	    System.out.println(" --- " + e.getKey());
     	}
+    	
+    	Object o = request.getParameter("cards");
     	
     	String parameterString = request.getParameter("parameters");
     	List<Object> parameters = (List<Object>) JsonUtil.getInstance().parse(parameterString);

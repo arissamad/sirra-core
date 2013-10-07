@@ -4,7 +4,11 @@ import java.lang.reflect.*;
 import java.util.*;
 
 import org.json.*;
+import org.json.simple.JSONValue;
 import org.json.simple.parser.*;
+import org.reflections.*;
+
+import com.sirra.server.rest.*;
 
 public class JsonUtil {
 	
@@ -16,6 +20,9 @@ public class JsonUtil {
 	
 	protected Map<Class, List<Field>> lookup = new HashMap();
 	
+	/**
+	 * Given a Java object, convert as JSONObject/JSONNArray.
+	 */
 	public Object convert(Object obj) {
 		try {
 			return _convertToJson(obj, 0);
@@ -115,15 +122,22 @@ public class JsonUtil {
 		if(jsonString == null) {
 			return null;
 		}
+		
+		Object obj = JSONValue.parse(jsonString);
+		return _parse(obj);
+		
+		/*
 		JSONParser parser = new JSONParser();
 		
 		try {
+			
 			Object obj = parser.parse(jsonString);
 			
 			return _parse(obj);
 		} catch(ParseException e) {
 			throw new RuntimeException(e);
 		}
+		*/
 	}
 	
 	protected Object _parse(Object obj) {
@@ -135,7 +149,47 @@ public class JsonUtil {
 				l.add(_parse(arr.get(i)));
 			}
 			return l;
-		} else {
+		} else if(obj instanceof org.json.simple.JSONObject) {
+			org.json.simple.JSONObject json = (org.json.simple.JSONObject) obj;
+			
+			for(Object keyObject: json.keySet()) {
+				String key = (String) keyObject;
+				Object childObject = json.get(key);
+				json.put(key, _parse(childObject));
+			}
+			
+			if(json.containsKey("_s_type")) {
+				
+				Reflections reflections = new Reflections(ApiServlet.getAPIPackageBase());
+		    	Set<Class<? extends SirraSerializable>> classes = reflections.getSubTypesOf(SirraSerializable.class);
+		    	
+		    	String className = (String) json.get("_s_type");
+		    	
+		    	for(Class theClass: classes) {
+		    		
+		    		if(theClass.getSimpleName().equals(className)) {
+		    			try {
+		    				SirraSerializable ss = (SirraSerializable) theClass.newInstance();
+		    				
+		    				for(Object keyObject: json.keySet()) {
+		    					String key = (String) keyObject;
+		    					Object childObject = json.get(key);
+		    					Setter.set(ss, key, childObject);
+		    				}
+		    				
+		    				return ss;
+		    			} catch(Exception e) {
+		    				throw new RuntimeException(e);
+		    			}
+		    		}
+		    	}
+		    	
+				// Instantiate native object
+				return json;
+			}
+			return json;
+		}
+		else {
 			return obj;
 		}
 	}
