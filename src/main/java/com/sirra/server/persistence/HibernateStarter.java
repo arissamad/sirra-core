@@ -31,6 +31,10 @@ public class HibernateStarter {
 		Reflections reflections = new Reflections(entityPackage);
     	Set<Class<?>> entityClasses = reflections.getTypesAnnotatedWith(Entity.class);
     	
+    	// App-core persistent entities
+    	Reflections appCoreReflections = new Reflections("com.sirra");
+    	entityClasses.addAll(appCoreReflections.getTypesAnnotatedWith(Entity.class));
+    	
     	for(Class clazz: entityClasses) {
     		System.out.println("Entity class found: " + clazz.getCanonicalName());
     		configuration.addAnnotatedClass(clazz);

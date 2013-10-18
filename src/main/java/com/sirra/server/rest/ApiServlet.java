@@ -128,6 +128,11 @@ public class ApiServlet extends HttpServlet {
     	System.out.println("\n--------- API Call Begin: " + httpMethod.name() + " " + apiPath + " - Parameters: [" + parameterDebug.toString() + "] --------- ");
     	SirraSession.start(request, response);
     	
+    	String userId = request.getParameter("userId");
+    	if(userId != null) {
+			SirraSession.get().setUserId(userId);
+		}
+    	
     	try {
     		ApiBase apiBase = (ApiBase) clazz.newInstance();
     		
