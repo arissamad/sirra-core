@@ -5,7 +5,20 @@ var _sirra = {};
 var gv = {};
 
 var current = null;
+var currentStack = [];
 
+function pushCurrent() {
+	currentStack.push(current);
+}
+
+function popCurrent() {
+	current = currentStack.pop();
+}
+
+function getPathId() {
+	var arr = location.href.split("/");
+	return arr[arr.length-1];
+}
 
 var isIE = false;
 if(navigator.appName == "Microsoft Internet Explorer") isIE = true;

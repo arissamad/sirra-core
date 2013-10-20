@@ -22,26 +22,21 @@ import com.sirra.server.templating.*;
 @WebServlet(urlPatterns = {"/*"})
 public class StaticContentServlet extends HttpServlet {
 
-	protected String extension;
-	
 	@Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
 		request.setCharacterEncoding("UTF-8");
 		response.setCharacterEncoding("UTF-8");
 		
-		//String mappedPath = mapPath(request.getPathInfo().toLowerCase());
-		String mappedPath = mapPath(request.getPathInfo());
+		PathData mappedPath = mapPath(request.getPathInfo());
 		
-		System.out.println("\nRetrieving static file: " + mappedPath);
+		System.out.println("\nRetrieving static file: " + mappedPath.getPath());
 		
 		ServletContext sc = getServletContext();
-		String mimeType = sc.getMimeType(mappedPath);
+		String mimeType = sc.getMimeType(mappedPath.getPath());
 		response.setContentType(mimeType);
 		
-        InputStream is = getClass().getClassLoader().getResourceAsStream(mappedPath);
-        
-        if (is == null) {
+        if(!mappedPath.isValid()) {
         	System.out.println(" -- Path not recognized");
         	request.getRequestDispatcher("/error404.html").forward(request,response);
         	return;
@@ -50,14 +45,13 @@ public class StaticContentServlet extends HttpServlet {
         if(mimeType != null && mimeType.equals("text/html")) {
         	// Do special processing for html files to support templating.
 
-            String content = IOUtils.toString(is);
+            String content = IOUtils.toString(mappedPath.getInputStream());
             content = fillInTemplates(content);
             
             response.getWriter().write(content);
         } else {
-            System.out.println("\n ==== =not text Retrieving static file: " + mappedPath);
         	// Otherwise, just write the file contents out.
-        	response.getOutputStream().write(IOUtils.toByteArray(is));
+        	response.getOutputStream().write(IOUtils.toByteArray(mappedPath.getInputStream()));
         	return;
         }
     }
@@ -68,10 +62,23 @@ public class StaticContentServlet extends HttpServlet {
 	 * 	- If the path does not have an extension, it will add ".html".
 	 *  - All our static files are in /resources/public. So add "html" to the path.
 	 */
-	protected String mapPath(String path) {
+	protected PathData mapPath(String path) {
 		if(path.equals("/")) path = "/index.html";
 		
-		extension = "html";
+		PathData fullPathData = tryPath(path);
+		
+		if(fullPathData.isValid()) return fullPathData;
+		
+		// Try removing last part, could be /id path parameter.
+		PathData partialPathData = tryPath(path.substring(0, path.lastIndexOf("/")));
+		if(partialPathData.isValid()) return partialPathData;
+		
+		// Return full path so error can be reported
+		return fullPathData;
+	}
+	
+	protected PathData tryPath(String path) {
+		String extension = "html";
 		
 		// Get last path element, without forward slash.
 		String lastPath = path.substring(path.lastIndexOf("/") + 1);
@@ -86,8 +93,10 @@ public class StaticContentServlet extends HttpServlet {
 		
 		// Finally, source it from the "/publicweb" subfolder.
 		path = "publicweb" + path;
-		
-		return path;
+	
+        InputStream is = getClass().getClassLoader().getResourceAsStream(path);
+       	
+		return new PathData(path, is, extension);
 	}
 	
 	protected String fillInTemplates(String content) {
@@ -103,5 +112,33 @@ public class StaticContentServlet extends HttpServlet {
         }
         
         return content;
+	}
+}
+
+class PathData {
+	protected String path;
+	protected InputStream is;
+	protected String extension;
+	
+	public PathData(String path, InputStream is, String extension) {
+		this.path = path;
+		this.is = is;
+		this.extension = extension;
+	}
+	
+	public String getPath() {
+		return path;
+	}
+	
+	public boolean isValid() {
+		return is != null;
+	}
+	
+	public InputStream getInputStream() {
+		return is;
+	}
+	
+	public String getExtension() {
+		return extension;
 	}
 }
