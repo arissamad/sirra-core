@@ -27,21 +27,21 @@ public class SirraSession {
 	}
 	
 	public static SirraSession get() {
-		SirraSession ms = lookup.get(Thread.currentThread());
+		SirraSession ss = lookup.get(Thread.currentThread());
 		
-		if(ms == null) lookup.put(Thread.currentThread(), new SirraSession(null, null));
+		if(ss == null) lookup.put(Thread.currentThread(), new SirraSession(null, null));
 		
 		return lookup.get(Thread.currentThread());
 	}
 	
 	public static void end() {
-		SirraSession ms = lookup.remove(Thread.currentThread());
-		ms.commit();
+		SirraSession ss = lookup.remove(Thread.currentThread());
+		ss.commit();
 	}
 	
 	public static void rollback() {
-		SirraSession ms = lookup.remove(Thread.currentThread());
-		ms._rollback();	
+		SirraSession ss = lookup.remove(Thread.currentThread());
+		ss._rollback();	
 	}
 	
 	protected HttpServletRequest request;
@@ -123,6 +123,21 @@ public class SirraSession {
 
 	public Session getHibernateSession() {
 		return hibernateSession;
+	}
+	
+	public void commitButLeaveRunnning() {
+		if(hibernateSession == null) {
+			System.err.println("Can't commit HibernateSession as there is no HibernateSession.");
+			return;
+		}
+		
+		try {
+			hibernateSession.getTransaction().commit();
+			hibernateSession.beginTransaction();
+		} catch (NullPointerException e) {
+			System.out.println("Failed to commit");
+			e.printStackTrace();
+		}
 	}
 
 	protected void commit() {
