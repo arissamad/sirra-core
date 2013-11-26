@@ -18,14 +18,22 @@ public class HibernateStarter {
 
 	public static SessionFactory sessionFactory;
 	
+	public static void init(String entityPackage) {
+		init(entityPackage, null);
+	}
+	
 	/**
 	 * @param entityPackage e.g. "com.sirra" The root package to search for entity classes.
 	 */
-	public static void init(String entityPackage) {
+	public static void init(String entityPackage, String password) {
 		Configuration configuration = new Configuration();
 		
 		// Process hibernate.cfg.xml
 		configuration.configure();
+
+		if(password != null) {
+			configuration.setProperty("hibernate.connection.password", password);
+		}
 		
 		// Auto-detect all persistent entities
 		Reflections reflections = new Reflections(entityPackage);
