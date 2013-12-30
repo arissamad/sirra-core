@@ -5,7 +5,7 @@
  *  Widget.call(this, "MyWidgetName");
  *  
  */
-function Widget(widgetName, attachNow, settings) {
+function Widget(widgetName, attachNow, settings, applySettings) {
 	
 	if(!_sirra.widgetLibrary.hasOwnProperty(widgetName)) {
 		throw new Error("Can't find widget: " + widgetName);
@@ -23,15 +23,17 @@ function Widget(widgetName, attachNow, settings) {
 	
 	this.settings = new Settings(settings);
 	
-	var classes = this.settings.get("classes", []);
-	for(var i=0; i<classes.length; i++) {
-		this.widget.addClass(classes[i]);
+	if(applySettings != false) {
+		var classes = this.settings.get("classes", []);
+		for(var i=0; i<classes.length; i++) {
+			this.widget.addClass(classes[i]);
+		}
+		
+		if(this.settings.has("css")) {
+			this.widget.css(this.settings.get("css"));
+		}
 	}
-	
-	if(this.settings.has("css")) {
-		this.widget.css(this.settings.get("css"));
-	}
-	
+		
 	this.input = this.widget.find("input");
 	if(this.input.length == 0) {
 		this.input = this.widget.find("textarea");

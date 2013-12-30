@@ -15,3 +15,18 @@ Settings.prototype.get = function(key, defaultValue) {
 		return defaultValue;
 	}
 };
+
+/**
+ * Apply classes and css standard settings onto jquery object.
+ */
+Settings.prototype.apply = function(jqObject) {
+
+	var classes = this.get("classes", []);
+	for(var i=0; i<classes.length; i++) {
+		jqObject.addClass(classes[i]);
+	}
+	
+	if(this.has("css")) {
+		jqObject.css(this.get("css"));
+	}
+};
