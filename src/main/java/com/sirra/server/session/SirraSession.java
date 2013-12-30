@@ -125,6 +125,7 @@ public class SirraSession {
 		return hibernateSession;
 	}
 	
+	// Consider using hibernateSession.flush()
 	public void commitButLeaveRunnning() {
 		if(hibernateSession == null) {
 			System.err.println("Can't commit HibernateSession as there is no HibernateSession.");
