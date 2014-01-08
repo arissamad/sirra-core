@@ -91,6 +91,7 @@ function loadHtml(htmlFile, successFunction) {
 	});
 };
 
+/*
 function loadJs(jsFile, successFunction) {
 	log("-- Loading js: " + jsFile);
 	$.ajax({
@@ -103,6 +104,24 @@ function loadJs(jsFile, successFunction) {
 	  dataType: "script",
 	  cache: true // Cache whenever possible
 	});
+};*/
+
+function loadJs(jsFile, successFunction) {
+	console.log("-- Loading js via script tag: " + jsFile);
+	var scriptElement = document.createElement("script");
+	scriptElement.type = 'text/javascript';
+	scriptElement.src = jsFile;
+	
+	$(scriptElement).bind("load", function(e) {
+		successFunction();
+	});
+    
+	if(document.body != null) {
+		document.body.appendChild(scriptElement);
+	} else {
+		// If body hasn't loaded yet
+		document.head.appendChild(scriptElement);
+	}
 };
 
 function _showAjaxError(a,b,c) {
