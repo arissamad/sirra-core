@@ -140,6 +140,21 @@ public class SirraSession {
 			e.printStackTrace();
 		}
 	}
+	
+	// When you need the current transactions to "see" the SQL changes made so far. Does not commit yet.
+	public void flushTransactions() {
+		if(hibernateSession == null) {
+			System.err.println("Can't commit HibernateSession as there is no HibernateSession.");
+			return;
+		}
+		
+		try {
+			hibernateSession.flush();
+		} catch (NullPointerException e) {
+			System.out.println("Failed to flush");
+			e.printStackTrace();
+		}
+	}
 
 	protected void commit() {
 		if(hibernateSession == null) {
