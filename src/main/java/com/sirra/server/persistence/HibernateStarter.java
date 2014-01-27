@@ -9,6 +9,7 @@ import org.hibernate.cfg.*;
 import org.hibernate.service.*;
 import org.reflections.Reflections;
 
+
 /**
  * Call HibernateStarter.init(...) from your bootstrap code to initialize hibernate functions. 
  * 
