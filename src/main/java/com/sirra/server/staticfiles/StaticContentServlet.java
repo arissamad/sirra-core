@@ -9,6 +9,7 @@ import javax.servlet.http.*;
 
 import org.apache.commons.io.*;
 
+import com.sirra.server.staticfiles.cache.*;
 import com.sirra.server.templating.*;
 
 /**
@@ -25,12 +26,21 @@ public class StaticContentServlet extends HttpServlet {
 	@Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
+		System.out.println("Retrieving static file at " + request.getPathInfo());
 		request.setCharacterEncoding("UTF-8");
 		response.setCharacterEncoding("UTF-8");
 		
+		StaticContentCache cache = StaticContentCache.getInstance();
+		
+		if(cache.containsPath(request.getPathInfo())) {
+			System.out.println(" -- Returning cached version of " + request.getPathInfo());
+			cache.process(request.getPathInfo(), response);
+			return;
+		}
+		
 		PathData mappedPath = mapPath(request.getPathInfo());
 		
-		System.out.println("\nRetrieving static file: " + mappedPath.getPath());
+		System.out.println("Static file identified: " + mappedPath.getPath());
 		
 		ServletContext sc = getServletContext();
 		String mimeType = sc.getMimeType(mappedPath.getPath());
@@ -49,9 +59,14 @@ public class StaticContentServlet extends HttpServlet {
             content = fillInTemplates(content);
             
             response.getWriter().write(content);
+            cache.cacheString(request.getPathInfo(), mimeType, content);
+            return;
         } else {
         	// Otherwise, just write the file contents out.
-        	response.getOutputStream().write(IOUtils.toByteArray(mappedPath.getInputStream()));
+        	byte[] bytes = IOUtils.toByteArray(mappedPath.getInputStream());
+        	
+        	response.getOutputStream().write(bytes);
+        	cache.cacheBytes(request.getPathInfo(), mimeType, bytes);
         	return;
         }
     }
