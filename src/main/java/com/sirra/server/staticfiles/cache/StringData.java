@@ -8,7 +8,7 @@ public class StringData extends Data {
 	protected String stringData;
 	
 	public StringData(String mimeType, String content) {
-		this.mimeType = mimeType;
+		superProcess(mimeType);
 		this.stringData = content;
 	}
 	

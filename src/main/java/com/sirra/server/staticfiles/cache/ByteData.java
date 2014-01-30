@@ -10,6 +10,7 @@ public class ByteData extends Data {
 	protected byte[] bytes;
 	
 	public ByteData(String mimeType, byte[] incomingBytes) {
+		superProcess(mimeType);
 		bytes = incomingBytes;
 	}
 	

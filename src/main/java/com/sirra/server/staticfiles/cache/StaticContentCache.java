@@ -35,7 +35,8 @@ public class StaticContentCache {
 	}
 	
 	public void process(String requestPathInfo, HttpServletResponse response) {
-		cache.get(requestPathInfo).process(response);
+		Data data = cache.get(requestPathInfo);
+		data.process(response);
 	}
 	
 	public void cacheString(String requestPathInfo, String mimeType, String content) {

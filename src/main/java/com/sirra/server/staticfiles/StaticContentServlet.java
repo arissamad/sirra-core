@@ -10,6 +10,7 @@ import javax.servlet.http.*;
 import org.apache.commons.io.*;
 
 import com.sirra.server.staticfiles.cache.*;
+import com.sirra.server.staticfiles.filter.*;
 import com.sirra.server.templating.*;
 
 /**
@@ -29,6 +30,8 @@ public class StaticContentServlet extends HttpServlet {
 		System.out.println("Retrieving static file at " + request.getPathInfo());
 		request.setCharacterEncoding("UTF-8");
 		response.setCharacterEncoding("UTF-8");
+		
+		FilterEngine.getInstance().filter(request.getPathInfo(), request, response);
 		
 		StaticContentCache cache = StaticContentCache.getInstance();
 		
