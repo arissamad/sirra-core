@@ -139,6 +139,8 @@ function _showAjaxError(a,b,c) {
 
 var loadCounter = {html:0, js:0, css:0, totalHtml: 0, totalJs: 0};
 
+var _sirraReady = false;
+
 var _initialLoaded = function(extension) {
 	loadCounter[extension]++;
 	
@@ -155,7 +157,13 @@ var _initialLoaded = function(extension) {
 		current = $("#sirra");
 		
 		// We need to check if onLoad was already called
-		onSirraStart();
+		if(window.onSirraStart != null) {
+			log("onSirraStart() is available.");
+			onSirraStart();
+		}
+		else {
+			_sirraReady = true; // You can put if statement near after onSirraStart to check for this.
+		}
 	}
 }
 
