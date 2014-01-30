@@ -113,6 +113,7 @@ function loadJs(jsFile, successFunction) {
 	scriptElement.src = jsFile;
 	
 	$(scriptElement).bind("load", function(e) {
+		log("Loaded js");
 		successFunction();
 	});
     
@@ -120,7 +121,7 @@ function loadJs(jsFile, successFunction) {
 		document.body.appendChild(scriptElement);
 	} else {
 		// If body hasn't loaded yet
-		document.head.appendChild(scriptElement);
+		document.getElementsByTagName('head')[0].appendChild(scriptElement);
 	}
 };
 
