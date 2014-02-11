@@ -10,7 +10,7 @@ import javax.servlet.http.*;
  */
 public abstract class Filter {
 
-	public abstract void process(String path, HttpServletRequest request, HttpServletResponse response);
+	public abstract void process(String requestPath, HttpServletRequest request, HttpServletResponse response);
 	
 	/**
 	 * Convenient path matcher method for use by subclasses.
