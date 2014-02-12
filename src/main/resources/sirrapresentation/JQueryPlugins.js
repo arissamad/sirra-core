@@ -28,11 +28,10 @@ jQuery.fn.enter = function(enterMethod) {
 };
 
 jQuery.fn.disableTextSelect = function() {
-    if($.browser.mozilla){
-    	this.css('MozUserSelect','none');
-    } else if($.browser.msie) {
-    	this.bind('selectstart', function(){return false;});
-    } else {
-    	this.mousedown(function(){return false;});
-    }
+	this.css({
+		"-ms-user-select": "none", /* IE 10+ */
+		"-moz-user-select": "-moz-none",
+		"user-select": "none",
+		"-webkit-user-select": "none"
+	});
 }
