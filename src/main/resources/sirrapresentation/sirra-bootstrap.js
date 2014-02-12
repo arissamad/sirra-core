@@ -4,6 +4,10 @@
 var _sirra = {};
 var gv = {};
 
+gv.perf = {
+	start: new Date().getTime()
+};
+
 var current = null;
 var currentStack = [];
 
@@ -149,6 +153,8 @@ var _initialLoaded = function(extension) {
 	if(loadCounter.html == loadCounter.totalHtml && loadCounter.js == loadCounter.totalJs) {
 		// Done loading.
 		
+		gv.perf.loaded = new Date().getTime();
+		
 		// Read all the widgets that have been loaded.
 		_sirra.processWidgets();
 		
@@ -159,7 +165,18 @@ var _initialLoaded = function(extension) {
 		// We need to check if onLoad was already called
 		if(window.onSirraStart != null) {
 			log("onSirraStart() is available.");
+			
+			gv.perf.beforeRender = new Date().getTime();
 			onSirraStart();
+			gv.perf.afterRender = new Date().getTime();
+			
+			var loadedTime = gv.perf.loaded - gv.perf.start;
+			var widgetTime = gv.perf.beforeRender - gv.perf.loaded;
+			var renderTime = gv.perf.afterRender - gv.perf.beforeRender;
+			
+			log("Loading time: " + loadedTime);
+			log("Widget time: " + widgetTime);
+			log("Render time: " + renderTime);
 		}
 		else {
 			_sirraReady = true; // You can put if statement near after onSirraStart to check for this.
