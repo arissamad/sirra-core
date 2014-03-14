@@ -83,6 +83,31 @@ ClassUtilStatic.prototype.serializable = function(currentClass, typeName, attrib
 	currentClass.prototype.toJSON = currentClass.prototype._toJSON;
 }
 
+
+ClassUtilStatic.prototype.addGetSet = function(theClass) {
+	for(var i=1; i<arguments.length; i++) {
+		var argName = arguments[i];
+		
+		var capitalArgName = argName.substring(0, 1).toUpperCase() + argName.substring(1);
+		
+		if(theClass.prototype["get" + capitalArgName] == null) {
+			theClass.prototype["get" + capitalArgName] = function(argName) {
+				return function() {
+					return this[argName];
+				};
+			}(argName);
+		}
+		
+		if(theClass.prototype["set" + capitalArgName] == null) {
+			theClass.prototype["set" + capitalArgName] = function(argName) {
+				return function(value) {
+					this[argName] = value;
+				};
+			}(argName);
+		}
+	}
+};
+
 function _s_toJSON() {
 	PersonCard.prototype.toJSON = null;
 	var str = JSON.stringify(this, ["email"]);
