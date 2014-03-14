@@ -3,7 +3,7 @@
 	
 	<groupId>com.sirra</groupId>
 	<artifactId>sirra-core</artifactId>
-	<version>1.22</version>
+	<version>1.23</version>
 	<packaging>jar</packaging>
 	
 	<name>sirra-core</name>
