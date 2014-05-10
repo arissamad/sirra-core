@@ -3,7 +3,7 @@
 	
 	<groupId>com.sirra</groupId>
 	<artifactId>sirra-core</artifactId>
-	<version>1.23</version>
+	<version>1.25</version>
 	<packaging>jar</packaging>
 	
 	<name>sirra-core</name>
@@ -15,6 +15,17 @@
 		<!-- github server corresponds to entry in ~/.m2/settings.xml -->
     	<github.global.server>github</github.global.server>
 	</properties>
+	
+	<pluginRepositories>
+	    <pluginRepository>
+	        <id>autoincrement-versions-maven-plugin</id>
+	        <name>autoincrement-versions-maven-plugin</name>
+	        <url>http://autoincrement-versions-maven-plugin.googlecode.com/svn/repo</url>
+	        <snapshots>
+	            <enabled>true</enabled>
+	        </snapshots>
+	    </pluginRepository>
+	</pluginRepositories>
 
 	<dependencies>
 		<dependency>
@@ -111,6 +122,12 @@
 					<phase>deploy</phase>
 					</execution>
 				</executions>
+			</plugin>
+			
+			<plugin>
+		        <groupId>org.codehaus.mojo</groupId>
+		        <artifactId>autoincrement-versions-maven-plugin</artifactId>
+		        <version>2.0-SNAPSHOT</version>
 			</plugin>
 			
 		</plugins>
