@@ -165,6 +165,7 @@ public class SirraSession {
 		try {
 			hibernateSession.getTransaction().commit();
 			hibernateSession.close();
+			hibernateSession = null;
 		} catch (NullPointerException e) {
 			System.out.println("Failed to commit");
 			e.printStackTrace();
@@ -185,5 +186,4 @@ public class SirraSession {
 			e.printStackTrace();
 		}
 	}
-	
 }
