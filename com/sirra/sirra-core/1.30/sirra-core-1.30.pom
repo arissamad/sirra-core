@@ -1,0 +1,144 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	
+	<groupId>com.sirra</groupId>
+	<artifactId>sirra-core</artifactId>
+	<version>1.30</version>
+	<packaging>jar</packaging>
+	
+	<name>sirra-core</name>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<jettyVersion>8.1.11.v20130520</jettyVersion>
+		
+		<!-- github server corresponds to entry in ~/.m2/settings.xml -->
+    	<github.global.server>github</github.global.server>
+	</properties>
+	
+	<pluginRepositories>
+	    <pluginRepository>
+	        <id>autoincrement-versions-maven-plugin</id>
+	        <name>autoincrement-versions-maven-plugin</name>
+	        <url>http://autoincrement-versions-maven-plugin.googlecode.com/svn/repo</url>
+	        <snapshots>
+	            <enabled>true</enabled>
+	        </snapshots>
+	    </pluginRepository>
+	</pluginRepositories>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-server</artifactId>
+			<version>${jettyVersion}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.4</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<version>4.2.1.Final</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20090211</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.googlecode.json-simple</groupId>
+			<artifactId>json-simple</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+		
+		<!-- For us to do annotation scanning -->
+		<dependency>
+			<groupId>org.reflections</groupId>
+			<artifactId>reflections</artifactId>
+			<version>0.9.9-RC1</version>
+		</dependency>
+		
+		<!-- For the RESTFUL annotations -->
+		<dependency>
+			<groupId>javax.ws.rs</groupId>
+			<artifactId>jsr311-api</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+		
+		
+	</dependencies>
+
+	<build>
+		<plugins>
+
+			<plugin>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>2.7</version>
+				<configuration>
+					<altDeploymentRepository>internal.repo::default::file://${project.build.directory}/mvn-repo</altDeploymentRepository>
+				</configuration>
+			</plugin>
+			
+			<!-- Allows us to deploy the target maven artifact to the "mvn-repo" branch -->
+			<plugin>
+				<groupId>com.github.github</groupId>
+				<artifactId>site-maven-plugin</artifactId>
+				<version>0.10</version>
+				<configuration>
+					<message>Maven artifacts for ${project.version}</message>
+					<!-- git commit message -->
+					
+					<noJekyll>true</noJekyll>
+					<!-- disable webpage processing -->
+					
+					<outputDirectory>${project.build.directory}/mvn-repo</outputDirectory>
+					<!-- matches distribution management repository url above -->
+					
+					<branch>refs/heads/mvn-repo</branch>
+					<!-- remote branch name -->
+					
+					<includes><include>**/*</include></includes>
+					
+					<repositoryName>sirra-core</repositoryName>
+					<!-- github repo name -->
+					
+					<repositoryOwner>arissamad</repositoryOwner>
+					<!-- github username  -->
+					
+				</configuration>
+				<executions>
+					<!-- run site-maven-plugin's 'site' target as part of the build's normal 'deploy' phase -->
+					<execution>
+						<goals>
+							<goal>site</goal>
+						</goals>
+					<phase>deploy</phase>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<plugin>
+		        <groupId>org.codehaus.mojo</groupId>
+		        <artifactId>autoincrement-versions-maven-plugin</artifactId>
+		        <version>2.0-SNAPSHOT</version>
+			</plugin>
+			
+		</plugins>
+	</build>
+	
+	<distributionManagement>
+		<repository>
+			<id>github</id>
+			<name>GitHub ${project.artifactId} Repository</name>
+			<url>https://raw.github.com/arissamad/${project.artifactId}/mvn-repo</url>
+		</repository>
+	</distributionManagement>
+	
+</project>
