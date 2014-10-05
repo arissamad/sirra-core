@@ -1,3 +1,8 @@
+if [ -z $1 ]; then
+  echo You need a commit message.
+  exit 1
+fi
+
 echo Commit message: $1
 
 echo -e "\033[1m--Incrementing version\033[0m"
