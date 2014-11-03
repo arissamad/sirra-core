@@ -10,6 +10,8 @@ import org.hibernate.service.*;
 import org.hibernate.type.*;
 import org.reflections.Reflections;
 
+import com.sirra.server.util.*;
+
 /**
  * Call HibernateStarter.init(...) from your bootstrap code to initialize hibernate functions. 
  * 
@@ -28,24 +30,30 @@ public class HibernateStarter {
 			customTypeMappings.add(basicType);
 		}
 	}
-	
-	public static void init(String entityPackage) {
-		init(entityPackage, null);
-	}
-	
+
 	/**
 	 * @param entityPackage e.g. "com.sirra" The root package to search for entity classes.
 	 */
-	public static void init(String entityPackage, String password) {
+	public static void init(String entityPackage) {
 		Configuration configuration = new Configuration();
 		
 		// Process hibernate.cfg.xml
 		configuration.configure();
 
-		if(password != null) {
-			configuration.setProperty("hibernate.connection.password", password);
+		Config config = Config.getInstance();
+
+		if(config.has("db.url")) {
+			configuration.setProperty("hibernate.connection.url", config.get("db.url") + "?ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory");
+		}
+
+		if(config.has("db.username")) {
+			configuration.setProperty("hibernate.connection.username", config.get("db.username"));
 		}
 		
+		if(config.has("db.password")) {
+			configuration.setProperty("hibernate.connection.password", config.get("db.password"));
+		}
+	
 		if(customTypeMappings != null) {
 			for(BasicType customType: customTypeMappings) {
 				configuration.registerTypeOverride(customType);		
