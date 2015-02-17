@@ -73,9 +73,12 @@ public class ControlCompiler {
 		
 		Set<String> files = reflections.getResources(pattern);
 		
+		SortedSet<String> sortedFiles = new TreeSet();
+		sortedFiles.addAll(files);
+		
 		System.out.println("Files (" + extension + "): ");
 		
-		for(String file: files) {
+		for(String file: sortedFiles) {
 			addFile(fileList, file);
 		}
 	}
