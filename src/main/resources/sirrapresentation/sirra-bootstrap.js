@@ -8,6 +8,8 @@ gv.perf = {
 	start: new Date().getTime()
 };
 
+gv._onReadyMethods = [];
+
 var current = null;
 var currentStack = [];
 
@@ -22,6 +24,11 @@ function popCurrent() {
 function getPathId() {
 	var arr = location.href.split("/");
 	return arr[arr.length-1];
+}
+
+// Call this to add code to do stuff before page is rendered
+function onSirraLoaded(theFunction) {
+	gv._onReadyMethods.push(theFunction);
 }
 
 var isIE = false;
@@ -157,6 +164,11 @@ var _initialLoaded = function(extension) {
 		
 		// Read all the widgets that have been loaded.
 		_sirra.processWidgets();
+		
+		// Process any on-ready code if needed
+		for(var i=0; i<gv._onReadyMethods.length; i++) {
+			gv._onReadyMethods[i]();
+		}
 		
 		log("Loaded all files. Starting page-specific sirra code.");
 		
