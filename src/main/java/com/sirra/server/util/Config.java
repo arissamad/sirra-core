@@ -2,9 +2,15 @@ package com.sirra.server.util;
 
 import java.math.*;
 import java.util.*;
+import java.util.Scanner;
 
 import javax.crypto.*;
 import javax.crypto.spec.*;
+
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jetty.util.*;
+
+import antlr.*;
 
 /**
  * Assists with reading environment variables.
@@ -101,6 +107,9 @@ public class Config {
 			try {
 				String encryptedString = encryptedLookup.get(key);
 				byte[] encryptedBytes = new BigInteger(encryptedString, 16).toByteArray();
+				
+				System.out.println("Encrypted bytes, again:" + encryptedBytes);
+				
 				byte[] decryptedValue = c.doFinal(encryptedBytes);
 				return new String(decryptedValue, "UTF-8");
 			} catch(Exception e) {
@@ -145,6 +154,9 @@ public class Config {
 			encrypterCipher.init(Cipher.ENCRYPT_MODE, secretKey);
 			
 			byte[] encryptedBytes = encrypterCipher.doFinal(value.getBytes("UTF-8"));
+			
+			System.out.println("Encrypted bytes2: " + StringUtils.join(encryptedBytes, " + "));
+			
 			return new BigInteger(1, encryptedBytes).toString(16);
 		} catch(Exception e) {
 			throw new RuntimeException();
