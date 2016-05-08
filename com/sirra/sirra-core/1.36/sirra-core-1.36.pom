@@ -3,7 +3,7 @@
 	
 	<groupId>com.sirra</groupId>
 	<artifactId>sirra-core</artifactId>
-	<version>1.32</version>
+	<version>1.36</version>
 	<packaging>jar</packaging>
 	
 	<name>sirra-core</name>
@@ -70,6 +70,12 @@
 			<groupId>javax.ws.rs</groupId>
 			<artifactId>jsr311-api</artifactId>
 			<version>1.1.1</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.4</version>
 		</dependency>
 		
 		
